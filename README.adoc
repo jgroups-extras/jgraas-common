@@ -1,1 +1,78 @@
 = JGroups-as-a-Service
+
+JGroups-as-a-service (JGraaS) separates a JChannel into a client stub and a server:
+
+----
+         Client                                Server
+
+    -----------------                   --------------------
+    |               |    protobuf       |                  |
+    | JChannel stub |   -------->       | JChannel server  |
+    |               |    TCP/IP         |                  |
+    -----------------                   --------------------
+----
+
+The service runs in a server, which has a JChannel, and listens for requests from the client.
+
+Requests are defined in protobuf and sent from the client to the server, and vice-versa. Requests are for example:
+
+* Messages (sent/received)
+* View changes (server -> client)
+
+When a request is received by the server, it is translated from protobuf to the JGroups version that the server is
+running and passed to the JChannel. For example, a message is sent down the JChannel. The response (if any) is again
+translated to protobuf, and sent back to the client.
+
+The client has a reference to a JChannel _stub_, which extends `org.jgroups.JChannel`, but forwards requests to the
+server. Responses are translated from protobuf to JGroups and passed to the caller.
+
+Client and server are typically in different processes, and may run different JGroups versions. However, they can be in
+the same process, e.g. for testing, but then of course they have to run the same version of JGroups.
+
+Because the JChannel interface is relatively stable, we don't anticipate a lot of changes to the JGroups-version
+dependant code, but - of course - tests have to be run for each new JGroups release to make sure of that. There should
+be a test which can be run to ensure that a new version is compatible, or not.
+
+The advantage of separating client and server is that the server can be upgraded to a new version, while the client is
+still running the old version. A client running version 1 (`v1`) could for instance be talking to *2* servers, one
+running `v1`, and the other running `v2`:
+
+----
+         Client                                Server
+
+                                          --------------------
+                                          |                  |
+                                    |---> | JChannel server  |
+                                    |     |        V2        |
+                                    |     --------------------
+    -----------------               |
+    |               |    protobuf   |
+    | JChannel stub |   ------------|
+    |     V1        |    TCP/IP     |
+    -----------------               |
+                                    |     --------------------
+                                    |     |                  |
+                                    |---> | JChannel server  |
+                                          |        V1        |
+                                          --------------------
+----
+The client is running `v1` and talks to a server which also has `v1` (bottom right).
+
+Next, a server running `v2` is started (top right). The location of the second server is passed to the client (a stub
+which can talk to multiple servers), but not yet made active.
+
+At the same time, all clients are switched over from talking to `v1` servers to `v2` servers. This means that all requests
+are *sent* to the `v2` servers, but lingering requests from `v1` servers can still be *received*.
+
+When we are sure that no lingering `v1` requests are present, all `v1` server can be terminated.
+
+At this point, there are 2 options:
+
+* The `v1` client can be restarted running `v2`, but this is still a client stub talking to a server, or
+* The `v2` client and server can be terminated, and a real JChannel *embedded in the application* talking `v2` can
+be started. This instance is able to talk to all `v2` servers or embedded `v2` instances.
+
+
+
+== Refs
+[1] https://issues.redhat.com/browse/JGRP-2411
