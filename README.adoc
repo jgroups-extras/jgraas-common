@@ -72,6 +72,17 @@ At this point, there are 2 options:
 * The `v2` client and server can be terminated, and a real JChannel *embedded in the application* talking `v2` can
 be started. This instance is able to talk to all `v2` servers or embedded `v2` instances.
 
+== Infinispan
+The main use will be rolling upgrades for Infinispan (but of course this can be used for standalone JGroups applications,
+too). Some ideas for implementing this are:
+
+* Methods such as `send()` etc are converted to protobuf and forwarded to the server
+* Anxillary methods such as `getName()`, `getAddress()`, `getView()` etc are cached by the client stub
+* Implementations of `ProbeHandler`, `AddressGenerator` etc are provided on the *server side only*. Note that we could
+theoretically serialize implementations (lambdas) and send them to the server.
+* `org.jgroups.Event`: we hope to avoid having to serialize events to send them from client to server, or vice versa.
+Classes which use events (e.g. `UpHandler`, or fetching the local physical address via a down-event) should be converted
+
 
 
 == Refs
