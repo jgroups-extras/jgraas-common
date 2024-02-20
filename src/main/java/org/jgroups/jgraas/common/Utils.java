@@ -193,7 +193,7 @@ public class Utils {
     public static class Marshaller {
 
         // 3.6 Marshaller
-        public static ByteArray objectToBuffer(Object obj) throws Exception {
+        public static ByteArray objectToBuffer(Object obj) throws java.lang.Exception {
             if(obj == null)
                 return NULL_BUFFER;
             if(obj instanceof Integer)
@@ -203,7 +203,7 @@ public class Utils {
         }
 
         // 3.6 Marshaller
-        public static Object objectFromBuffer(byte[] buf, int offset, int length) throws Exception {
+        public static Object objectFromBuffer(byte[] buf, int offset, int length) throws java.lang.Exception {
             byte type;
             if(length == 0 || (type=buf[offset]) == TYPE_NULL)
                 return null;

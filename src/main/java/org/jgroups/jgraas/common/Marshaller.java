@@ -13,8 +13,8 @@ public interface Marshaller {
      * potentially can get retransmitted, and such a retransmission would then carry a ref to a changed byte[] buffer !
      * </em>
      */
-    ByteArray objectToBuffer(Object obj) throws Exception;
+    ByteArray objectToBuffer(Object obj) throws java.lang.Exception;
 
-    Object objectFromBuffer(byte[] buf, int offset, int length) throws Exception;
+    Object objectFromBuffer(byte[] buf, int offset, int length) throws java.lang.Exception;
 }
 
