@@ -6,10 +6,14 @@ package org.jgroups.jgraas.common;
 
 option java_multiple_files = true;
 
-
-service UpgradeService {
-    rpc Connect (stream Request) returns (stream Response);
-    rpc Dump (Void)              returns (DumpResponse);
+message Request {
+    oneof these {
+        Message      message        = 1; // client <-> server
+        JoinRequest  join_req       = 2; // client -> server
+        LeaveRequest leave_req      = 3; // client -> server
+        View         view           = 4; // server -> client
+        Exception    exception      = 5; // server -> client (blocking calls)
+    }
 }
 
 message Message {
@@ -18,9 +22,21 @@ message Message {
     Address   sender        = 3;
     int32     flags         = 4;
     bytes     payload       = 5;
-    // Headers   headers      = 6;
     Metadata  meta_data     = 7; // metadata (may be null)
     repeated Header headers = 8;
+}
+
+message MessageBatch {
+    string cluster_name     = 1;
+    Address destination     = 2;
+    Address sender          = 3;
+    repeated Message msgs   = 4;
+}
+
+message Exception {
+    string classname     = 1;
+    string message       = 2;
+    string stacktrace    = 3;
 }
 
 message JoinRequest {
@@ -34,42 +50,12 @@ message LeaveRequest {
     Address leaver       = 2;
 }
 
-/** Sent by the coordinator on activate(). The UpgradeServer then adds the view into its map, overwriting any view
- already present. When view is null, the entry matching cluster_name will be removed (on deactivate()) */
-message RegisterView {
-    string  cluster_name = 1;
-    View    view         = 2;
-    Address local_addr   = 3;
-}
-
-message RegisterViewOk {
-}
-
-/** Gets the view from the UpgradeServer */
-message GetViewRequest {
-    string cluster_name = 1;
-}
-
-message GetViewResponse {
-    View view = 1;
-}
-
 message Address {
     string name = 1; // logical name
     oneof actual_address {
         UUID     uuid      = 2;
         SiteUUID site_uuid = 3;
     }
-}
-
-message ViewId {
-    int64 id        = 1;
-    Address creator = 2;
-}
-
-message View {
-    ViewId           view_id = 1;
-    repeated Address member  = 2;
 }
 
 message UUID {
@@ -83,33 +69,27 @@ message SiteUUID {
     bool   is_site_master         = 3; // -> SiteMaster if true
 }
 
+message View {
+    ViewId           view_id = 1;
+    repeated Address member  = 2;
+}
 
-message Request {
+message ViewId {
+    int64 id        = 1;
+    Address creator = 2;
+}
+
+message Metadata {
+    int32 msg_type  = 1;
+    int32 version   = 2;
+}
+
+message Header {
+    int32 protocol_id = 1;
     oneof one_of {
-        Message      message        = 1;
-        JoinRequest  join_req       = 2;
-        LeaveRequest leave_req      = 3;
-        RegisterView register_req   = 4;
-        GetViewRequest get_view_req = 5;
+        RpcHeader     rpc_hdr       = 2;
+        ForkHeader    fork_hdr      = 3;
     }
-}
-
-message Response {
-    oneof one_of {
-        Message         message      = 1;
-        View            view         = 2;
-        RegisterViewOk  reg_view_ok  = 3;
-        GetViewResponse get_view_rsp = 4;
-    }
-}
-
-
-message Void {
-    // contains nothing
-}
-
-message DumpResponse {
-    string dump = 1;
 }
 
 /** Header used for RPCs (RpcDispatcher / MessageDispatcher) */
@@ -120,7 +100,7 @@ message RpcHeader {
     repeated Address exclusion_list = 4;
 }
 
-message RelayHeader {
+/*message RelayHeader {
     enum Type {
         DATA             = 0;
         SITE_UNREACHABLE = 1; // final_dest is a SiteMaster
@@ -138,13 +118,14 @@ message RelayHeader {
     bool             return_entire_cache = 6;
     repeated Header  original_headers    = 7; // https://issues.redhat.com/browse/JGRP-2744
     int32            original_flags      = 8;
-}
+}*/
 
 message ForkHeader {
     string fork_stack_id   = 1;
     string fork_channel_id = 2;
 }
 
+/*
 message UnicastHeader {
     enum Type {
         DATA             = 0;
@@ -160,25 +141,8 @@ message UnicastHeader {
     int32          timestamp      = 5;   // SEND_FIRST_SEQNO and ACK
     repeated int64 missing_seqnos = 6;
 }
+*/
 
-//message Headers {
-  //  RpcHeader   rpc_hdr   = 1;
-    //RelayHeader relay_hdr = 2;
-//}
 
-message Header {
-    int32 protocol_id = 1;
-    oneof one_of {
-        RpcHeader     rpc_hdr       = 2;
-        RelayHeader   relay_hdr     = 3;
-        ForkHeader    fork_hdr      = 4;
-        UnicastHeader unicast_hdr   = 5;
-    }
-}
-
-message Metadata {
-    int32 msg_type  = 1;
-    int32 version   = 2;
-}
 
 
