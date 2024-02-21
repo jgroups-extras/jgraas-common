@@ -12,7 +12,8 @@ message Request {
         JoinRequest  join_req       = 2; // client -> server
         LeaveRequest leave_req      = 3; // client -> server
         View         view           = 4; // server -> client
-        Exception    exception      = 5; // server -> client (blocking calls)
+        Heartbeat    heartbeat      = 5; // client -> server
+        Exception    exception      = 6; // server -> client (blocking calls)
     }
 }
 
@@ -31,6 +32,10 @@ message MessageBatch {
     Address destination     = 2;
     Address sender          = 3;
     repeated Message msgs   = 4;
+}
+
+message Heartbeat {
+
 }
 
 message Exception {
