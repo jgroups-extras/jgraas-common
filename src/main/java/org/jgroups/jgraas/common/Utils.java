@@ -172,18 +172,18 @@ public class Utils {
         return null;
     }
 
-    public static String print(View v) {
-        return String.format("[%s]", v.getMemberList().stream().map(Address::getName).collect(Collectors.joining(", ")));
+    public static String print(ProtoView v) {
+        return String.format("[%s]", v.getMemberList().stream().map(ProtoAddress::getName).collect(Collectors.joining(", ")));
     }
 
-    public static String print(Collection<Address> addresses) {
-        return String.format("[%s]", addresses.stream().map(Address::getName).collect(Collectors.joining(", ")));
+    public static String print(Collection<ProtoAddress> addresses) {
+        return String.format("[%s]", addresses.stream().map(ProtoAddress::getName).collect(Collectors.joining(", ")));
     }
 
-    public static String printView(long view_id, Collection<Address> addrs) {
+    public static String printView(long view_id, Collection<ProtoAddress> addrs) {
         if(addrs == null || addrs.isEmpty())
             return "null";
-        Address coord=addrs.iterator().next();
+        ProtoAddress coord=addrs.iterator().next();
         return String.format("[%s|%d] (%d) %s", coord.getName(), view_id, addrs.size(), print(addrs));
     }
 

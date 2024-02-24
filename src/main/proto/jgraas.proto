@@ -6,147 +6,111 @@ package org.jgroups.jgraas.common;
 
 option java_multiple_files = true;
 
-message Request {
+message ProtoRequest {
     oneof choice {
-        Message      message        = 1; // client <-> server
-        JoinRequest  join_req       = 2; // client -> server
-        LeaveRequest leave_req      = 3; // client -> server
-        View         view           = 4; // server -> client
-        Heartbeat    heartbeat      = 5; // client -> server
-        Exception    exception      = 6; // server -> client (blocking calls)
+        ProtoMessage      message        = 1; // client <-> server
+        ProtoJoinRequest  join_req       = 2; // client -> server
+        ProtoLeaveRequest leave_req      = 3; // client -> server
+        ProtoView         view           = 4; // server -> client
+        ProtoHeartbeat    heartbeat      = 5; // client -> server
+        ProtoException    exception      = 6; // server -> client (blocking calls)
     }
 }
 
-message Message {
-    string    cluster_name  = 1;
-    Address   destination   = 2; // null: send to all
-    Address   sender        = 3;
-    int32     flags         = 4;
-    bytes     payload       = 5;
-    Metadata  meta_data     = 6; // metadata (may be null)
-    repeated Header headers = 7;
+message ProtoMessage {
+    string               cluster_name  = 1;
+    ProtoAddress         destination   = 2; // null: send to all
+    ProtoAddress         sender        = 3;
+    int32                flags         = 4;
+    bytes                payload       = 5;
+    ProtoMetadata        meta_data     = 6; // metadata (may be null)
+    repeated ProtoHeader headers       = 7;
 }
 
-message MessageBatch {
-    string cluster_name     = 1;
-    Address destination     = 2;
-    Address sender          = 3;
-    repeated Message msgs   = 4;
+message ProtoMessageBatch {
+    string cluster_name          = 1;
+    ProtoAddress destination     = 2;
+    ProtoAddress sender          = 3;
+    repeated ProtoMessage msgs   = 4;
 }
 
-message Heartbeat {
+message ProtoHeartbeat {
 
 }
 
-message Exception {
+message ProtoException {
     string classname     = 1;
     string message       = 2;
     string stacktrace    = 3;
 }
 
-message JoinRequest {
+message ProtoJoinRequest {
     string  cluster_name = 1;
     // Address address      = 2;
 }
 
 /** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the UpgradeService directly  */
-message LeaveRequest {
+message ProtoLeaveRequest {
     string  cluster_name = 1;
     // Address leaver       = 2;
 }
 
-message Address {
+message ProtoAddress {
     string name = 1; // logical name
     oneof actual_address {
-        UUID     uuid      = 2;
-        SiteUUID site_uuid = 3;
+        ProtoUUID     uuid      = 2;
+        ProtoSiteUUID site_uuid = 3;
     }
 }
 
-message UUID {
+message ProtoUUID {
     int64 most_sig   = 1; // most significant bits
     int64 least_sig  = 2; // least significant bits
 }
 
-message SiteUUID {
-    UUID   uuid                   = 1;
-    string site_name              = 2;
-    bool   is_site_master         = 3; // -> SiteMaster if true
+message ProtoSiteUUID {
+    ProtoUUID   uuid           = 1;
+    string      site_name      = 2;
+    bool        is_site_master = 3; // -> SiteMaster if true
 }
 
-message View {
-    ViewId           view_id = 1;
-    repeated Address member  = 2;
+message ProtoView {
+    ProtoViewId           view_id = 1;
+    repeated ProtoAddress member  = 2;
 }
 
-message ViewId {
+message ProtoViewId {
     int64 id        = 1;
-    Address creator = 2;
+    ProtoAddress creator = 2;
 }
 
-message Metadata {
+message ProtoMetadata {
     int32 msg_type  = 1;
     int32 version   = 2;
 }
 
-message Header {
+message ProtoHeader {
     int32 protocol_id = 1;
     oneof one_of {
-        RpcHeader     rpc_hdr       = 2;
-        ForkHeader    fork_hdr      = 3;
+        ProtoRpcHeader     rpc_hdr  = 2;
+        ProtoForkHeader    fork_hdr = 3;
     }
 }
 
 /** Header used for RPCs (RpcDispatcher / MessageDispatcher) */
-message RpcHeader {
-    int32            type           = 1; // 0=request, 1=response, 2=exception
-    int64            request_id     = 2;
-    int32            corr_id        = 3;
-    repeated Address exclusion_list = 4;
+message ProtoRpcHeader {
+    int32                 type           = 1; // 0=request, 1=response, 2=exception
+    int64                 request_id     = 2;
+    int32                 corr_id        = 3;
+    repeated ProtoAddress exclusion_list = 4;
 }
 
-/*message RelayHeader {
-    enum Type {
-        DATA             = 0;
-        SITE_UNREACHABLE = 1; // final_dest is a SiteMaster
-        HOST_UNREACHABLE = 2; // final_dest is a SiteUUID (not currently used)
-        SITES_UP         = 3;
-        SITES_DOWN       = 4;
-        TOPO_REQ         = 5;
-        TOPO_RSP         = 6;
-    }
-    Type             type                = 1;
-    Address          final_dest          = 2;
-    Address          original_sender     = 3;
-    repeated string  sites               = 4;
-    repeated string  visited_sites       = 5;
-    bool             return_entire_cache = 6;
-    repeated Header  original_headers    = 7; // https://issues.redhat.com/browse/JGRP-2744
-    int32            original_flags      = 8;
-}*/
 
-message ForkHeader {
+message ProtoForkHeader {
     string fork_stack_id   = 1;
     string fork_channel_id = 2;
 }
 
-/*
-message UnicastHeader {
-    enum Type {
-        DATA             = 0;
-        ACK              = 1;
-        SEND_FIRST_SEQNO = 2;
-        XMIT_REQ         = 3; // Seqnos of missing message are in missing_seqnos
-        CLOSE            = 4;
-    }
-    Type           type           = 1;
-    int64          seqno          = 2;   // DATA and ACK
-    int32          conn_id        = 3;   // DATA and CLOSE
-    bool           first          = 4;   // DATA
-    int32          timestamp      = 5;   // SEND_FIRST_SEQNO and ACK
-    repeated int64 missing_seqnos = 6;
-}
-*/
 
 
 
