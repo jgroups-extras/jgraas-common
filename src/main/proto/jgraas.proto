@@ -9,11 +9,12 @@ option java_multiple_files = true;
 message ProtoRequest {
     oneof choice {
         ProtoMessage      message        = 1; // client <-> server
-        ProtoJoinRequest  join_req       = 2; // client -> server
-        ProtoLeaveRequest leave_req      = 3; // client -> server
-        ProtoView         view           = 4; // server -> client
-        ProtoHeartbeat    heartbeat      = 5; // client -> server
-        ProtoException    exception      = 6; // server -> client (blocking calls)
+        ProtoMessageBatch message_batch  = 2; // server -> client
+        ProtoJoinRequest  join_req       = 3; // client -> server
+        ProtoLeaveRequest leave_req      = 4; // client -> server
+        ProtoView         view           = 5; // server -> client
+        ProtoHeartbeat    heartbeat      = 6; // client -> server
+        ProtoException    exception      = 7; // server -> client (blocking calls)
     }
 }
 
