@@ -28,10 +28,19 @@ message ProtoMessage {
 }
 
 message ProtoMessageBatch {
-    string cluster_name          = 1;
+    string       cluster_name    = 1;
     ProtoAddress destination     = 2;
     ProtoAddress sender          = 3;
     repeated ProtoMessage msgs   = 4;
+    bool         multicast       = 5;
+    Mode         mode            = 6;
+    int64        timestamp       = 7;
+}
+
+enum Mode {
+    OOB   = 0;
+    REG   = 1;
+    MIXED = 2;
 }
 
 message ProtoHeartbeat {
