@@ -61,7 +61,7 @@ message ProtoJoinRequest {
 
 /** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the UpgradeService directly  */
 message ProtoLeaveRequest {
-    string  cluster_name = 1;
+    // string  cluster_name = 1;
     // Address leaver       = 2;
 }
 
