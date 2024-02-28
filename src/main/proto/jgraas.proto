@@ -65,7 +65,8 @@ message ProtoJoinResponse {
     ProtoAddress   local_address = 2;
     string         name          = 3;
     ProtoIpAddress ip_addr       = 4;
-    ProtoException ex            = 5;
+    ProtoView      view          = 5;
+    ProtoException ex            = 6;
 }
 
 /** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the server directly  */
