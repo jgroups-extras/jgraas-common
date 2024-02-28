@@ -45,8 +45,6 @@ enum Mode {
     MIXED = 2;
 }
 
-
-
 message ProtoHeartbeat {
 
 }
@@ -66,7 +64,8 @@ message ProtoJoinResponse {
     string         cluster       = 1;
     ProtoAddress   local_address = 2;
     string         name          = 3;
-    ProtoException ex            = 4;
+    ProtoIpAddress ip_addr       = 4;
+    ProtoException ex            = 5;
 }
 
 /** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the server directly  */
@@ -74,10 +73,11 @@ message ProtoLeaveRequest {
 }
 
 message ProtoAddress {
-    string name = 1; // logical name
+    string                  name      = 1; // logical name
     oneof actual_address {
-        ProtoUUID     uuid      = 2;
-        ProtoSiteUUID site_uuid = 3;
+        ProtoUUID           uuid      = 2;
+        ProtoSiteUUID       site_uuid = 3;
+        ProtoIpAddress      ip_addr   = 4;
     }
 }
 
@@ -90,6 +90,11 @@ message ProtoSiteUUID {
     ProtoUUID   uuid           = 1;
     string      site_name      = 2;
     bool        is_site_master = 3; // -> SiteMaster if true
+}
+
+message ProtoIpAddress {
+    bytes address = 1;
+    int32 port    = 2;
 }
 
 message ProtoView {
