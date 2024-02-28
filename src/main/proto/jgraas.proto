@@ -11,10 +11,11 @@ message ProtoRequest {
         ProtoMessage      message        = 1; // client <-> server
         ProtoMessageBatch message_batch  = 2; // server -> client
         ProtoJoinRequest  join_req       = 3; // client -> server
-        ProtoLeaveRequest leave_req      = 4; // client -> server
-        ProtoView         view           = 5; // server -> client
-        ProtoHeartbeat    heartbeat      = 6; // client -> server
-        ProtoException    exception      = 7; // server -> client (blocking calls)
+        ProtoJoinResponse join_rsp       = 4; // server -> client
+        ProtoLeaveRequest leave_req      = 5; // client -> server
+        ProtoView         view           = 6; // server -> client
+        ProtoHeartbeat    heartbeat      = 7; // client -> server
+        ProtoException    exception      = 8; // server -> client (blocking calls)
     }
 }
 
@@ -44,6 +45,8 @@ enum Mode {
     MIXED = 2;
 }
 
+
+
 message ProtoHeartbeat {
 
 }
@@ -56,13 +59,18 @@ message ProtoException {
 
 message ProtoJoinRequest {
     string  cluster_name = 1;
-    // Address address      = 2;
+    string  name         = 2;
 }
 
-/** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the UpgradeService directly  */
+message ProtoJoinResponse {
+    string         cluster       = 1;
+    ProtoAddress   local_address = 2;
+    string         name          = 3;
+    ProtoException ex            = 4;
+}
+
+/** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the server directly  */
 message ProtoLeaveRequest {
-    // string  cluster_name = 1;
-    // Address leaver       = 2;
 }
 
 message ProtoAddress {
