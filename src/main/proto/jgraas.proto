@@ -8,14 +8,18 @@ option java_multiple_files = true;
 
 message ProtoRequest {
     oneof choice {
-        ProtoMessage      message        = 1; // client <-> server
-        ProtoMessageBatch message_batch  = 2; // server -> client
-        ProtoJoinRequest  join_req       = 3; // client -> server
-        ProtoJoinResponse join_rsp       = 4; // server -> client
-        ProtoLeaveRequest leave_req      = 5; // client -> server
-        ProtoView         view           = 6; // server -> client
-        ProtoHeartbeat    heartbeat      = 7; // client -> server
-        ProtoException    exception      = 8; // server -> client (blocking calls)
+        ProtoMessage      message        =  1; // client <-> server
+        ProtoMessageBatch message_batch  =  2; // server -> client
+        ProtoJoinRequest  join_req       =  3; // client -> server
+        ProtoJoinResponse join_rsp       =  4; // server -> client
+        ProtoLeaveRequest leave_req      =  5; // client -> server
+        ProtoStateRequest state_req      =  6; // client -> server
+        ProtoGetStateReq  get_state_req  =  7; // server -> client
+        ProtoGetStateRsp  get_state_rsp  =  8; // client -> server
+        ProtoSetStateReq  set_state_req  =  9; // server -> client
+        ProtoView         view           = 10; // server -> client
+        ProtoHeartbeat    heartbeat      = 11; // client -> server
+        ProtoException    exception      = 12; // server -> client (blocking calls)
     }
 }
 
@@ -71,6 +75,23 @@ message ProtoJoinResponse {
 
 /** Used for graceful leaves. Ungraceful leaves (e.g. crashes) are detected by the server directly  */
 message ProtoLeaveRequest {
+}
+
+message ProtoStateRequest {
+    ProtoAddress target     = 1;
+    int64        timeout    = 2;
+}
+
+message ProtoGetStateReq {
+}
+
+message ProtoGetStateRsp {
+    bytes          state = 1;
+    ProtoException exception = 2;
+}
+
+message ProtoSetStateReq {
+    bytes state = 1;
 }
 
 message ProtoAddress {
